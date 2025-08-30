@@ -7,7 +7,7 @@
 #### Hardware Connect
 
 * Using adapt board connect up to 4 cameras
-  ![atl text](../Picture/RDKS100/RDKS100_CAMERA.jpg)
+  ![atl text](./Image/RDKS100_CAMERA.jpg)
 
 #### Power Supply
 
