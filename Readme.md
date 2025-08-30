@@ -9,4 +9,4 @@ Users who are using SENSING Cameras can reference the driver to light up cameras
 * **RDKS100**
 
   * Support RDKS100 V0P6 Version
-    ![atl text](./Picture/RDKS100/RDKS100.jpg)
+    ![atl text](RDKS100/Image/RDKS100.jpg)
