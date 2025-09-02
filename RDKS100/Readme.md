@@ -24,4 +24,3 @@
 | YUV  | SHW3H-Hxxx                  | YES           | 
 | YUV  | SHF3L-Hxxx                  | YES           | 
 | YUV  | SG8S-AR0820C-5300-G2A-Hxxx  | YES           | 
-| YUV  | SG3S-ISX031-DUAL-MIPI-Hxxx  | YES           |

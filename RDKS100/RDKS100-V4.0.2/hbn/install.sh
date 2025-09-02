@@ -23,7 +23,6 @@ echo 4:SG3S-ISX031C-GMSL2F
 echo 5:SHW3H
 echo 6:SHF3L
 echo 7:SG8S-AR0820C-5300-G2A
-echo 8:SG3S-ISX031-DUAL-MIPI
 
 green_print "Press select your camera type:"
 read key
@@ -34,8 +33,3 @@ else
 	sudo dpkg -i ./so/hobot-camera_4.0.2-20250829164010_arm64.deb
 fi
 
-if [ ${key} -eq 8 ]; then
-    sudo dpkg -i ./kernel/linux-image-rdk-s100_6.1.112-rt43-DR-4.0.2-2507011631-g1864ec-g92a805-dirty-8_arm64.deb
-    sleep 1
-    sudo reboot
-fi

@@ -24,10 +24,6 @@
 * SG8S-AR0820C-5300-G2A-Hxxx
 
   * support max 2 cameras to light up at the same time
-* SG3S-ISX031-DUAL-MIPI-Hxxx
-
-  * support max 1 cameras to light up at the same time
-
 
 #### Quick Bring Up(Take SG2-AR0233C-5200-G2A as an example)
 
