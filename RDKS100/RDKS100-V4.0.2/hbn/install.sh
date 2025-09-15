@@ -23,13 +23,16 @@ echo 4:SG3S-ISX031C-GMSL2F
 echo 5:SHW3H
 echo 6:SHF3L
 echo 7:SG8S-AR0820C-5300-G2A
+echo 8:S36
 
 green_print "Press select your camera type:"
 read key
 
 if [ ${key} -eq 1 -o ${key} -eq 2 ];then
 	sudo dpkg -i ./so/hobot-camera_4.0.2-20250830134613_arm64_gmsl1.deb
-else
+elif [ ${key} -eq 8 ];then
+    sudo dpkg -i ./so/hobot-camera_4.0.2-20250912110123_arm64_s36.deb
+else 
 	sudo dpkg -i ./so/hobot-camera_4.0.2-20250829164010_arm64.deb
 fi
 

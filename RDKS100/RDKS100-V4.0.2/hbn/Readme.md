@@ -24,6 +24,10 @@
 * SG8S-AR0820C-5300-G2A-Hxxx
 
   * support max 2 cameras to light up at the same time
+* S36
+
+  * support max 2 cameras to light up at the same time
+  (Can only be connected to linkA and linkB of MAX96712 for use)
 
 #### Quick Bring Up(Take SG2-AR0233C-5200-G2A as an example)
 
@@ -50,7 +54,7 @@
     5:SHW3H
     6:SHF3L
     7:SG8S-AR0820C-5300-G2A
-    8:SG3S-ISX031-DUAL-MIPI
+    8:S36
     Press select your camera type:
     3
     (Reading database ... 212484 files and directories currently installed.)
@@ -66,7 +70,7 @@
    For example:
 
    ```
-   cd /home/sunrise/hbn/app/camsys_demo_capture/sample_vin/get_vin_data/
+   cd /home/sunrise/hbn/app/camsys_demo/sample_vin/get_vin_data/
    make
    ./get_vin_data (root)
    No sensors specified.
@@ -91,6 +95,10 @@
    index: 10  sensor_name: ar0820std-30fps         config_file:linear_3840x2160_30fps_1lane.c
    index: 11  sensor_name: isx031_dual             config_file:linear_1920x1536_yuv_30fps_1lane_left.c
    index: 12  sensor_name: isx031_dual             config_file:linear_1920x1536_yuv_30fps_1lane_right.c
+   index: 13  sensor_name: isx031std               config_file:linear_1920x1536_30fps_1lane_trig.c
+   index: 14  sensor_name: s36                     config_file:linear_1920x1536_30fps_4lane_vc0.c
+   index: 15  sensor_name: s36                     config_file:linear_1920x1536_30fps_4lane_vc1.c
+   index: 16  sensor_name: dummystd                config_file:linear_1920x1536_30fps_4lane_vc1_dummy.c
 
    ./get_vin_data -s 6 -l 0
    Using index:6  sensor_name:ar0233std-30fps  config_file:linear_1920x1080_30fps_1lane.c
@@ -112,13 +120,16 @@
 
    Enter "g" or "l" to start taking pictures
 
+   In particular, for the S36 dual-camera, you can obtain the data from the two sensors separately by using 
+   ./get_vin_data -s 14 -l 0 and 
+   ./get_vin_data -s 15 -l 0.
    ```
 7. Save multiple camera images
    
    For example:
 
    ```
-   cd /home/sunrise/hbn/app/camsys_demo_capture/sample_vin/get_multi_vin_data/
+   cd /home/sunrise/hbn/app/camsys_demo/sample_vin/get_multi_vin_data/
    make 
    ./get_multi_vin_data (root)
    Usage: get_multi_vin_data [Options]
@@ -143,8 +154,17 @@
    index: 10  sensor_name: ar0820std-30fps         config_file:linear_3840x2160_30fps_1lane.c
    index: 11  sensor_name: isx031_dual             config_file:linear_1920x1536_yuv_30fps_1lane_left.c
    index: 12  sensor_name: isx031_dual             config_file:linear_1920x1536_yuv_30fps_1lane_right.c
+   index: 13  sensor_name: isx031std               config_file:linear_1920x1536_30fps_1lane_trig.c
+   index: 14  sensor_name: s36                     config_file:linear_1920x1536_30fps_4lane_vc0.c
+   index: 15  sensor_name: s36                     config_file:linear_1920x1536_30fps_4lane_vc1.c
+   index: 16  sensor_name: dummystd                config_file:linear_1920x1536_30fps_4lane_vc1_dummy.c
 
    ./get_multi_vin_data --config="sensor=6 link=0" --config="sensor=6 link=1" --config="sensor=6 link=2" --config="sensor=6 link=3"
+
+   Specifically, for the s36 dual-camera, you can use the commands 
+   "./get_multi_vin_data --config='sensor=14 link=0' --config='sensor=16 link=1'" and 
+   "./get_multi_vin_data --config='sensor=14 link=2' --config='sensor=16 link=3'" 
+   to simultaneously obtain the data from both sensors.
    ```
 
    note:This command is used to simultaneously capture the streams from four cameras. If the corresponding link-port is not connected to a camera, simply remove the corresponding "--config" option.
