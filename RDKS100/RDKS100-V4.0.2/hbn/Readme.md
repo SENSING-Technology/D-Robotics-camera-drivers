@@ -27,14 +27,14 @@
 * S36
 
   * support max 2 cameras to light up at the same time
-  (Can only be connected to linkA and linkB of MAX96712 for use)
+  (Can only be connected to linkA and linkC of MAX96712 for use)
 
 #### Quick Bring Up(Take SG2-AR0233C-5200-G2A as an example)
 
 1. Copy the hbn driver package to the working directory of the Jetson device, such as “/home/sunrise”
 
    ```
-   /home/nvidia/hbn
+   /home/sunrise/hbn
    ```
 2. Enter the driver directory
 
