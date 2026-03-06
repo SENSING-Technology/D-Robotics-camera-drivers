@@ -74,8 +74,8 @@ make
 ### Example output
 
 ```text
-Using index:0  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_right.c
-Using index:1  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_left.c
+Using index:0  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_left.c
+Using index:1  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_right.c
 Using index:2  sensor_name:shw3gstd  config_file:linear_2064x1552_30fps_1lane.c
 Pipeline index 0:
         Sensor index: 0
@@ -121,7 +121,7 @@ Pipeline 2 FPS: 30
 
 ## Capture YUV Data
 
-Example (right `s56g`):
+Example (left `s56g`):
 
 ```bash
 cd /root/hobot-multimedia-samples/debian/app/multimedia_samples/sample_isp/get_isp_data
@@ -132,7 +132,7 @@ make
 ### Example output
 
 ```text
-Using index:0  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_right.c
+Using index:0  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_left.c
 All deserial link info:
         [link_port:0] s56std:0@512
         [link_port:1] sc1336_gmsl:0@256
@@ -154,7 +154,7 @@ Command: g
 handle 100197 isp dump yuv 2560x1984(stride:2560), buffer size: 5079040 + 2539520 frame id: 26, timestamp: 198363261625
 ```
 
-Example (left `s56g`):
+Example (right `s56g`):
 
 Note: You must start the right camera first. In terminal 1:
 
@@ -162,14 +162,14 @@ Note: You must start the right camera first. In terminal 1:
 ./get_multi_vin_data -c "sensor=0 link=0"
 ```
 
-Then capture the left YUV image in terminal 2:
+Then capture the right YUV image in terminal 2:
 
 ```bash
 ./get_isp_data -s 1 -l 1
 ```
 
 ```text
-Using index:1  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_left.c
+Using index:1  sensor_name:s56std  config_file:linear_2560x1984_30fps_1lane_right.c
 All deserial link info:
         [link_port:0] sc1336_gmsl:0@256
         [link_port:1] s56std:0@512

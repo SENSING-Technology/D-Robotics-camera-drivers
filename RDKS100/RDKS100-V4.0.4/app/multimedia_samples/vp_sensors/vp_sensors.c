@@ -43,8 +43,8 @@ vp_sensor_config_t *vp_sensor_config_list[] = {
 	// &imx623std_linear_1920x1536_30fps_1lane,
 	// &shw3h_shf3l_std_linear_1920x1536_30fps_1lane,
 	// &isx031std_linear_1920x1536_30fps_1lane,
-	&s56std_linear_2560x1984_30fps_1lane_right,
 	&s56std_linear_2560x1984_30fps_1lane_left,
+	&s56std_linear_2560x1984_30fps_1lane_right,
 	&shw3gstd_linear_2064x1552_30fps_1lane,
 
 };
