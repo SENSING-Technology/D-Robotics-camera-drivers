@@ -1,0 +1,139 @@
+/***************************************************************************
+ * @COPYRIGHT NOTICE
+ * @Copyright 2024 D-Robotics, Inc.
+ * @All rights reserved.
+ * @Date: 2023-02-23 14:01:59
+ * @LastEditTime: 2023-03-05 15:57:48
+ ***************************************************************************/
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "utils/utils_log.h"
+
+#include "vp_wrap.h"
+#include "vp_vin.h"
+
+int32_t vp_vin_init(vp_vflow_contex_t *vp_vflow_contex)
+{
+	int32_t ret = 0;
+
+	vp_sensor_config_t *sensor_config = vp_vflow_contex->sensor_config;
+	camera_config_t camera_config_copy = *sensor_config->camera_config;
+	// camera_config_copy = ;
+	vin_node_attr_t *vin_node_attr = sensor_config->vin_node_attr;
+	vin_ichn_attr_t *vin_ichn_attr = sensor_config->vin_ichn_attr;
+	vin_ochn_attr_t *vin_ochn_attr = sensor_config->vin_ochn_attr;
+
+	vin_node_attr->magicNumber = MAGIC_NUMBER;
+	vin_ochn_attr->magicNumber = MAGIC_NUMBER;
+
+
+	uint32_t chn_id = 0;
+
+	hbn_vnode_handle_t *vin_node_handle = &vp_vflow_contex->vin_node_handle;
+	hbn_buf_alloc_attr_t alloc_attr = {0};
+	//创建camera node
+	if(sensor_config->sensor_type == SENSOR_TYPE_NORMAL){
+		/*
+			1. sensor_config 是全局变量，多个同配置的Sensor实例时，会导致配置被覆盖
+			2. vp_csi_config_t 中保存随着输入变化而变化的信息，在配置时使用
+	 	*/
+		camera_config_copy.addr = vp_vflow_contex->sensor_addr;
+	}else{
+		vp_update_camera_config(sensor_config->camera_config,
+			&camera_config_copy, vp_vflow_contex->link_port);
+		vin_node_attr->cim_attr.vc_index = vp_vflow_contex->link_port;
+	}
+	ret = hbn_camera_create(&camera_config_copy, &vp_vflow_contex->cam_fd);
+	SC_ERR_CON_EQ(ret, 0, "hbn_camera_create");
+
+	// 创建pipeline中的vin node
+	{
+		vp_flow_info_t *vp_flow_info = &vp_vflow_contex->vp_flow_info;
+		if(vp_flow_info->is_online_vin_isp){
+			vin_ochn_attr->ddr_en = 0;
+			vin_node_attr->cim_attr.cim_isp_flyby  = 1;
+		}else{
+			vin_ochn_attr->ddr_en = 1;
+			vin_node_attr->cim_attr.cim_isp_flyby  = 0;
+		}
+		vin_node_attr->cim_attr.mipi_rx = vp_vflow_contex->mipi_csi_rx_index;
+	}
+	uint32_t hw_id = vin_node_attr->cim_attr.mipi_rx;
+	ret = hbn_vnode_open(HB_VIN, hw_id, AUTO_ALLOC_ID, vin_node_handle);
+	SC_ERR_CON_EQ(ret, 0, "hbn_vnode_open");
+	// 设置基本属性
+	ret = hbn_vnode_set_attr(*vin_node_handle, vin_node_attr);
+	SC_ERR_CON_EQ(ret, 0, "hbn_vnode_set_attr");
+	// 设置输入通道的属性
+	ret = hbn_vnode_set_ichn_attr(*vin_node_handle, chn_id, vin_ichn_attr);
+	SC_ERR_CON_EQ(ret, 0, "hbn_vnode_set_ichn_attr");
+	// 设置输出通道的属性
+	ret = hbn_vnode_set_ochn_attr(*vin_node_handle, chn_id, vin_ochn_attr);
+	SC_ERR_CON_EQ(ret, 0, "hbn_vnode_set_ochn_attr");
+
+	if(vin_ochn_attr->ddr_en){
+		alloc_attr.buffers_num = vp_vflow_contex->vin_info.ochn_buffer_count;
+		alloc_attr.is_contig = 1;
+		alloc_attr.flags = HB_MEM_USAGE_CPU_READ_OFTEN
+							| HB_MEM_USAGE_CPU_WRITE_OFTEN
+							| HB_MEM_USAGE_CACHED
+							| HB_MEM_USAGE_HW_CIM
+							| HB_MEM_USAGE_GRAPHIC_CONTIGUOUS_BUF;
+		ret = hbn_vnode_set_ochn_buf_attr(*vin_node_handle, chn_id, &alloc_attr);
+		SC_ERR_CON_EQ(ret, 0, "hbn_vnode_set_ochn_buf_attr");
+	}
+	SC_LOGD("successful");
+	return 0;
+}
+
+int32_t vp_vin_deinit(vp_vflow_contex_t *vp_vflow_contex)
+{
+	hbn_vnode_close(vp_vflow_contex->vin_node_handle);
+	return hbn_camera_destroy(vp_vflow_contex->cam_fd);
+}
+
+int32_t vp_vin_start(vp_vflow_contex_t *vp_vflow_contex)
+{
+	int32_t ret = 0;
+
+	SC_LOGD("successful");
+	return ret;
+}
+
+int32_t vp_vin_stop(vp_vflow_contex_t *vp_vflow_contex)
+{
+	int32_t ret = 0;
+
+	SC_LOGD("successful");
+	return ret;
+}
+
+int32_t vp_vin_get_frame(vp_vflow_contex_t *vp_vflow_contex, ImageFrame *frame)
+{
+	int32_t ret = 0;
+	hbn_vnode_handle_t vin_node_handle = vp_vflow_contex->vin_node_handle;
+	uint32_t chn_id = 0;
+
+	ret = hbn_vnode_getframe_cond(vin_node_handle, chn_id, VP_GET_FRAME_TIMEOUT,
+		0, frame->hbn_vnode_image);
+	if (ret != 0) {
+		SC_LOGE("hbn_vnode_getframe %d CIM failed(%d)\n", chn_id, ret);
+	}
+
+	return ret;
+}
+
+int32_t vp_vin_release_frame(vp_vflow_contex_t *vp_vflow_contex, ImageFrame *frame)
+{
+	int32_t ret = 0;
+	uint32_t chn_id = 0;
+	hbn_vnode_handle_t vin_node_handle = vp_vflow_contex->vin_node_handle;
+
+	ret = hbn_vnode_releaseframe(vin_node_handle, chn_id, frame->hbn_vnode_image);
+
+	return ret;
+}

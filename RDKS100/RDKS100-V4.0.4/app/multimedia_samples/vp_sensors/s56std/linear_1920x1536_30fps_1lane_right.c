@@ -1,0 +1,284 @@
+#include "vp_sensors.h"
+// #include "vp_pym.h"
+
+
+#define SENSOR_FPS 30
+
+#define SENSOR_WIDTH 2560
+#define SENSOR_HEIGHT 1984
+
+#define YUV422  0x1e
+#define RAW8  0x2a
+#define RAW10 0x2b
+#define RAW12  0x2c
+#define RGB888  0x24
+
+#define RAW10_STRIDE_PACKED(w) (((w) * 10 + 7) / 8)
+
+
+static mipi_config_t s56std_mipi_config = {
+	.rx_enable = 1,
+	.rx_attr = {
+		.phy = 0,
+		.lane = 1,
+		.datatype = RAW10,
+		.fps = 30,
+		.mclk = 24,
+		.mipiclk = 810,
+		.width = SENSOR_WIDTH,
+		.height = SENSOR_HEIGHT,
+		.linelenth = 2600,
+		.framelenth = 2000,
+		.settle = 20,
+		.channel_num = 1,
+		.channel_sel = {0},
+	},
+};
+
+static camera_config_t s56std_camera_config = {
+		/* 0 */
+		.name = "s56std",
+		.addr = 0x20,  // .addr = 0x11, .addr = 0x14,
+		.eeprom_addr = 0x50,
+		.serial_addr = 0x40,
+		.sensor_mode = 0x5,
+		.fps = 30,
+		.width = SENSOR_WIDTH,
+		.height = SENSOR_HEIGHT,
+		.extra_mode = 0,
+		.config_index = 512,
+		//.mipi_cfg = &s56std_mipi_config, // MIPI配置,NULL自动获取
+		.end_flag = CAMERA_CONFIG_END_FLAG,
+		.calib_lname = "disable",
+};
+
+static poc_config_t g_poc_cfg[] = {
+	{
+		/* 0 */
+		.addr = 0x28,
+		.poc_map = 0x2013,
+		.end_flag = POC_CONFIG_END_FLAG,
+	},
+};
+
+static deserial_config_t s56std_deserial_config = {
+	.name = "max96712",
+	.link_desp[0] = "s56std:0@512",
+	.link_desp[1] = "s56std:0@512",
+	.link_desp[2] = "s56std:0@512",
+	.link_desp[3] = "s56std:0@512",
+	.addr = 0x29,
+	.gpio_mfp[CAMERA_DES_GPIO_TRIG0] = 5,
+	.gpio_mfp[CAMERA_DES_GPIO_TRIG1] = 5,
+	.gpio_mfp[CAMERA_DES_GPIO_TRIG2] = 5,
+	.gpio_mfp[CAMERA_DES_GPIO_TRIG3] = 5,
+	.poc_cfg = &g_poc_cfg[0],
+	.end_flag = DESERIAL_CONFIG_END_FLAG,
+};
+
+static vin_ichn_attr_t s56std_vin_ichn_attr = {
+	.width =  SENSOR_WIDTH,
+	.height = SENSOR_HEIGHT,
+	.format = RAW12,
+};
+
+static vin_attr_ex_t s56std_vin_attr_ex = {
+	.cim_static_attr = {
+		.water_level_mark = 0,
+	},
+};
+
+static vin_ochn_attr_t s56std_vin_ochn_attr = {
+	.ddr_en = 1,
+	.vin_basic_attr = {
+		.format = RAW12,
+		.wstride = 0,
+		.pack_mode = 1,
+	},
+	.pingpong_ring = 1,
+	.roi_en = 0,
+	.roi_attr = {
+		.roi_x = 0,
+		.roi_y = 0,
+		.roi_width = 1920,
+		.roi_height = 1080,
+	},
+	.rawds_en = 0,
+	.rawds_attr = {
+		.rawds_mode = 0,
+	},
+};
+
+static vin_node_attr_t s56std_vin_node_attr = {
+	.vcon_attr = {
+		.bus_main = 3,
+		.bus_second = 3,
+	},
+
+	.cim_attr = {
+		.mipi_en = 1,
+		.cim_isp_flyby = 0,
+		.cim_pym_flyby = 0,
+		.mipi_rx = 4,
+		.vc_index = 0,
+		.ipi_channels = 1,
+		.y_uv_swap = 0,
+		.func = {
+			.enable_frame_id = 1,
+			.set_init_frame_id = 1,
+			.enable_pattern = 0,
+			.lpwm_trig_sel = 2,
+		},
+		.rdma_input = {
+			.rdma_en = 0,
+			.stride = 0,
+			.pack_mode = 1,
+			.buff_num = 6,
+		},
+	},
+	.lpwm_attr = {
+		.lpwm_chn_attr = {
+			{	.enable = 1,
+				.trigger_source = 0,
+				.trigger_mode = 1,
+				.period = 33333,
+				.offset = 10,
+				.duty_time = 100,
+				.threshold = 0,
+				.adjust_step = 0,
+			},
+			{	.enable = 1,
+				.trigger_source = 0,
+				.trigger_mode = 1,
+				.period = 33333,
+				.offset = 10,
+				.duty_time = 100,
+				.threshold = 0,
+				.adjust_step = 0,
+			},
+			{	.enable = 1,
+				.trigger_source = 0,
+				.trigger_mode = 1,
+				.period = 33333,
+				.offset = 10,
+				.duty_time = 6,
+				.threshold = 100,
+				.adjust_step = 0,
+			},
+			{	.enable = 1,
+				.trigger_source = 0,
+				.trigger_mode = 1,
+				.period = 33333,
+				.offset = 10,
+				.duty_time = 100,
+				.threshold = 0,
+				.adjust_step = 0,
+			},
+		},
+	},
+};
+
+static isp_attr_t s56std_isp_attr = {
+	.channel = {
+		.hw_id = 0,
+		.slot_id = 4,
+		.ctx_id = -1, //#define AUTO_ALLOC_ID -1
+	},
+	.work_mode = 0,
+	.hdr_mode = 1,
+	.size = {
+		.width = SENSOR_WIDTH,
+		.height = SENSOR_HEIGHT,
+	},
+	.frame_rate = SENSOR_FPS,
+	.sched_mode = 1,
+	.algo_state = 1,
+	.isp_combine = {
+		.isp_channel_mode = 0, //ISP_CHANNEL_MODE_NORMAL
+		.bind_channel = {
+			.bind_hw_id = 0,
+			.bind_slot_id = 0,
+		},
+	},
+	.clear_record = 0, //json和代码中未拿到，设置为0
+	.isp_sw_ctrl = {
+		.ae_stat_buf_en = 1,
+		.awb_stat_buf_en = 1,
+		.ae5bin_stat_buf_en = 1,
+		.ctx_buf_en = 0,
+		.pixel_consistency_en = 0,
+	},
+};
+
+static isp_ichn_attr_t s56std_isp_ichn_attr = {
+	.input_crop_cfg = {
+		.enable = 0,
+		.rect = {
+			.x = 0,
+			.y = 0,
+			.width = 0,
+			.height = 0,
+		},
+	},
+	.in_buf_noclean = 1,
+	.in_buf_noncached = 0,
+};
+
+static isp_ochn_attr_t s56std_isp_ochn_attr = {
+	.output_crop_cfg = {
+		.enable = 0,
+		.rect = {
+			.x = 0,
+			.y = 0,
+			.width = 0,
+			.height = 0,
+		},
+	},
+	.out_buf_noinvalid = 1,
+	.out_buf_noncached = 0,
+	.output_raw_level = 0, //ISP_OUTPUT_RAW_LEVEL_SENSOR_DATA
+	.stream_output_mode = 0, //convert_isp_stream_output(1),
+	.axi_output_mode = 9, //convert_isp_axi_output(0),
+	.buf_num = 3,
+};
+
+static struct ynr_init_attr s56std_ynr_attr = {
+	.work_mode = 1,
+	.slot_id = 4,
+
+	.width = SENSOR_WIDTH,
+	.height = SENSOR_HEIGHT,
+	.nr_static_switch = 0b11, // (nr3d_en << 1) | (nr2d_en);
+	.in_stride = {
+		SENSOR_WIDTH, SENSOR_HEIGHT
+	},
+	.nr2d_en = 1,
+	.nr3d_en = 1,
+
+	.dma_output_en = 1, // nr3d_en
+
+	.debug_en = 0,
+};
+
+vp_sensor_config_t s56std_linear_2560x1984_30fps_1lane_right = {
+	.chip_id_reg = 0,
+	.chip_id = 0x0,
+	.sensor_i2c_addr_list = {0x0f}, 
+	.sensor_type = SENSOR_TYPE_GMSL_RAW,
+	// .sensor_i2c_addr_list = {0, 0, 0, 0, 0, 0, 0, 0}, // don't know chipid, so set addr 0
+	.sensor_name = "s56std",
+	.config_file = "linear_2560x1984_30fps_1lane_right.c",
+	.camera_config = &s56std_camera_config,
+	.deserial_node_attr = &s56std_deserial_config,
+	// .vin_attr = &s56std_vin_attr,
+
+	.vin_ichn_attr = &s56std_vin_ichn_attr,
+	.vin_node_attr = &s56std_vin_node_attr,
+	.vin_attr_ex = &s56std_vin_attr_ex,
+	.vin_ochn_attr = &s56std_vin_ochn_attr,
+
+	.isp_attr      = &s56std_isp_attr,
+	.isp_ichn_attr = &s56std_isp_ichn_attr,
+	.isp_ochn_attr = &s56std_isp_ochn_attr,
+	.ynr_attr = &s56std_ynr_attr,
+};

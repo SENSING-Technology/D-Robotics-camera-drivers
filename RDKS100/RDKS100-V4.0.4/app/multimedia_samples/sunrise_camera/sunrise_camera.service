@@ -1,0 +1,13 @@
+[Unit]
+Description=Sunrise Camera Application (One-time run)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/app/multimedia_samples/sunrise_camera/sunrise_camera/bin/
+ExecStart=/app/multimedia_samples/sunrise_camera/sunrise_camera/bin/sunrise_camera
+RemainAfterExit=yes  # 保持状态（即使进程退出）
+Restart=no           # 禁止自动重启
+
+[Install]
+WantedBy=multi-user.target

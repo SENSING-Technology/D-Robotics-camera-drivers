@@ -25,3 +25,9 @@
 | YUV  | SHF3L-Hxxx                  | YES           | 
 | YUV  | SG8S-AR0820C-5300-G2A-Hxxx  | YES           |
 | YUV  | S36                         | YES           | 
+
+
+| Type | Camera                      |     V4.0.4    | 
+| ---- | --------------------------- | ------------- | 
+| RAW  | S56                         | YES           | 
+| RAW  | SHW3G                       | YES           | 
