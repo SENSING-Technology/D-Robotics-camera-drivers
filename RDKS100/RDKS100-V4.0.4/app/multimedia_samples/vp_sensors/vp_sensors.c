@@ -28,8 +28,9 @@
 // extern vp_sensor_config_t shw3h_shf3l_std_linear_1920x1536_30fps_1lane;
 // extern vp_sensor_config_t isx031std_linear_1920x1536_30fps_1lane;
 extern vp_sensor_config_t shw3gstd_linear_2064x1552_30fps_1lane;
-extern vp_sensor_config_t s56std_linear_2560x1984_30fps_1lane_left;
-extern vp_sensor_config_t s56std_linear_2560x1984_30fps_1lane_right;
+// extern vp_sensor_config_t s56std_linear_2560x1984_30fps_1lane_left;
+// extern vp_sensor_config_t s56std_linear_2560x1984_30fps_1lane_right;
+extern vp_sensor_config_t s56std_linear_2560x1984_30fps_4lane;
 
 vp_sensor_config_t *vp_sensor_config_list[] = {
     // &imx219_linear_1920x1080_raw10_30fps_1lane,
@@ -43,8 +44,9 @@ vp_sensor_config_t *vp_sensor_config_list[] = {
 	// &imx623std_linear_1920x1536_30fps_1lane,
 	// &shw3h_shf3l_std_linear_1920x1536_30fps_1lane,
 	// &isx031std_linear_1920x1536_30fps_1lane,
-	&s56std_linear_2560x1984_30fps_1lane_left,
-	&s56std_linear_2560x1984_30fps_1lane_right,
+	// &s56std_linear_2560x1984_30fps_1lane_right,
+	// &s56std_linear_2560x1984_30fps_1lane_left,
+	&s56std_linear_2560x1984_30fps_4lane,
 	&shw3gstd_linear_2064x1552_30fps_1lane,
 
 };
