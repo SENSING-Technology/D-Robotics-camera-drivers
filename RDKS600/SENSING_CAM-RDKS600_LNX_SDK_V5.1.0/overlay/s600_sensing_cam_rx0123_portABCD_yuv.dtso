@@ -1,0 +1,881 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * D-Robotics S600: 16-channel sensing camera overlay
+ *
+ * RX0..RX3 each connect one MAX96712. Each MAX96712 uses Port A..D
+ * and transports four YUV422 streams on VC0..VC3.
+ *
+ * RX1 board resources are inferred from the RX0/RX2/RX3 numbering pattern:
+ *   PWDN peri_port0[5], PoC gpio_exp_27[1], PWM lpwm0 channel 2.
+ * Verify these three assignments against the S600 MCB schematic before use.
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target-path = "/soc/i2c@34840000/"; /* I2C0 */
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <100000>;
+
+			rx0_dser: rx0_max96712@29 {
+				compatible = "d-robotics,max96712";
+				reg = <0x29>;
+				phy_type = <0>; /* D-PHY */
+				phy_speed = <2500>; /* 2.5 Gbps per lane */
+				sensing,trigger-period-ns = <33333333>;
+				sensing,trigger-duty-ns = <10000>;
+				pwdn-gpios = <&peri_port0 4 GPIO_ACTIVE_HIGH>;
+				poc_en-gpios = <&gpio_exp_27 0 GPIO_ACTIVE_HIGH>;
+				soc_trig_pin = <5>;
+				pwms = <&lpwm0 0 33333000 20000>;
+				pwm-names = "sync";
+				trig_src = <0>;
+				trig_mode = <1>;
+				status = "okay";
+			};
+
+			rx0_ser_prim: rx0_max9295_prim@40 {
+				compatible = "d-robotics,max9295";
+				reg = <0x40>;
+				is-prim-ser;
+				rx_index = <0>;
+				status = "okay";
+			};
+
+			rx0_ser_a: rx0_max9295_a@41 {
+				compatible = "d-robotics,max9295";
+				reg = <0x41>;
+				link-port = <0>;
+				rx_index = <0>;
+				status = "okay";
+			};
+
+			rx0_sensing_a@11 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x11>;
+				addr = <0x10>;
+				width = <3840>;
+				height = <2160>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx0_ser_a>;
+				d-robotics,serdes-dser-device = <&rx0_dser>;
+				status = "okay";
+
+				port {
+					rx0_sensor_a_out: endpoint {
+						remote-endpoint = <&rx0_mipi_vc0_in>;
+						virtual-channel = <0>;
+					};
+				};
+			};
+
+			rx0_ser_b: rx0_max9295_b@42 {
+				compatible = "d-robotics,max9295";
+				reg = <0x42>;
+				link-port = <1>;
+				rx_index = <0>;
+				status = "okay";
+			};
+
+			rx0_sensing_b@12 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x12>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx0_ser_b>;
+				d-robotics,serdes-dser-device = <&rx0_dser>;
+				status = "okay";
+
+				port {
+					rx0_sensor_b_out: endpoint {
+						remote-endpoint = <&rx0_mipi_vc1_in>;
+						virtual-channel = <1>;
+					};
+				};
+			};
+
+			rx0_ser_c: rx0_max9295_c@43 {
+				compatible = "d-robotics,max9295";
+				reg = <0x43>;
+				link-port = <2>;
+				rx_index = <0>;
+				status = "okay";
+			};
+
+			rx0_sensing_c@13 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x13>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1536>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <3>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx0_ser_c>;
+				d-robotics,serdes-dser-device = <&rx0_dser>;
+				status = "okay";
+
+				port {
+					rx0_sensor_c_out: endpoint {
+						remote-endpoint = <&rx0_mipi_vc2_in>;
+						virtual-channel = <2>;
+					};
+				};
+			};
+
+			rx0_ser_d: rx0_max9295_d@44 {
+				compatible = "d-robotics,max9295";
+				reg = <0x44>;
+				link-port = <3>;
+				rx_index = <0>;
+				status = "okay";
+			};
+
+			rx0_sensing_d@14 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x14>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx0_ser_d>;
+				d-robotics,serdes-dser-device = <&rx0_dser>;
+				status = "okay";
+
+				port {
+					rx0_sensor_d_out: endpoint {
+						remote-endpoint = <&rx0_mipi_vc3_in>;
+						virtual-channel = <3>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@1 {
+		target-path = "/soc/i2c@34841000/"; /* I2C1 */
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <100000>;
+
+			rx1_dser: rx1_max96712@29 {
+				compatible = "d-robotics,max96712";
+				reg = <0x29>;
+				phy_type = <1>; /* C-PHY */
+				phy_speed = <3648>; /* C-PHY 1600 Msps/trio: DPLL code 0x10 */
+				sensing,trigger-period-ns = <33333333>;
+				sensing,trigger-duty-ns = <10000>;
+				pwdn-gpios = <&peri_port0 5 GPIO_ACTIVE_HIGH>;
+				poc_en-gpios = <&gpio_exp_27 1 GPIO_ACTIVE_HIGH>;
+				soc_trig_pin = <5>;
+				pwms = <&lpwm0 2 33333000 20000>;
+				pwm-names = "sync";
+				trig_src = <0>;
+				trig_mode = <1>;
+				status = "okay";
+			};
+
+			rx1_ser_prim: rx1_max9295_prim@40 {
+				compatible = "d-robotics,max9295";
+				reg = <0x40>;
+				is-prim-ser;
+				rx_index = <1>;
+				status = "okay";
+			};
+
+			rx1_ser_a: rx1_max9295_a@41 {
+				compatible = "d-robotics,max9295";
+				reg = <0x41>;
+				link-port = <0>;
+				rx_index = <1>;
+				status = "okay";
+			};
+
+			rx1_sensing_a@11 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x11>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				stereo_left; 
+				d-robotics,serdes-ser-device = <&rx1_ser_a>;
+				d-robotics,serdes-dser-device = <&rx1_dser>;
+				status = "okay";
+
+				port {
+					rx1_sensor_a_out: endpoint {
+						remote-endpoint = <&rx1_mipi_vc0_in>;
+						virtual-channel = <0>;
+					};
+				};
+			};
+
+			rx1_ser_b: rx1_max9295_b@42 {
+				compatible = "d-robotics,max9295";
+				reg = <0x42>;
+				link-port = <1>;
+				rx_index = <1>;
+				status = "okay";
+			};
+
+			rx1_sensing_b@12 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x12>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				stereo_right; 
+				d-robotics,serdes-ser-device = <&rx1_ser_b>;
+				d-robotics,serdes-dser-device = <&rx1_dser>;
+				status = "okay";
+
+				port {
+					rx1_sensor_b_out: endpoint {
+						remote-endpoint = <&rx1_mipi_vc1_in>;
+						virtual-channel = <1>;
+					};
+				};
+			};
+
+			rx1_ser_c: rx1_max9295_c@43 {
+				compatible = "d-robotics,max9295";
+				reg = <0x43>;
+				link-port = <2>;
+				rx_index = <1>;
+				status = "okay";
+			};
+
+			rx1_sensing_c@13 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x13>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx1_ser_c>;
+				d-robotics,serdes-dser-device = <&rx1_dser>;
+				status = "okay";
+
+				port {
+					rx1_sensor_c_out: endpoint {
+						remote-endpoint = <&rx1_mipi_vc2_in>;
+						virtual-channel = <2>;
+					};
+				};
+			};
+
+			rx1_ser_d: rx1_max9295_d@44 {
+				compatible = "d-robotics,max9295";
+				reg = <0x44>;
+				link-port = <3>;
+				rx_index = <1>;
+				status = "okay";
+			};
+
+			rx1_sensing_d@14 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x14>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx1_ser_d>;
+				d-robotics,serdes-dser-device = <&rx1_dser>;
+				status = "okay";
+
+				port {
+					rx1_sensor_d_out: endpoint {
+						remote-endpoint = <&rx1_mipi_vc3_in>;
+						virtual-channel = <3>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@2 {
+		target-path = "/soc/i2c@34842000/"; /* I2C2 */
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <100000>;
+
+			rx2_dser: rx2_max96712@29 {
+				compatible = "d-robotics,max96712";
+				reg = <0x29>;
+				phy_type = <0>; /* D-PHY */
+				phy_speed = <2500>; /* 2.5 Gbps per lane */
+				sensing,trigger-period-ns = <33333333>;
+				sensing,trigger-duty-ns = <10000>;
+				pwdn-gpios = <&peri_port0 6 GPIO_ACTIVE_HIGH>;
+				poc_en-gpios = <&gpio_exp_27 2 GPIO_ACTIVE_HIGH>;
+				soc_trig_pin = <5>;
+				pwms = <&lpwm3 0 33333000 20000>;
+				pwm-names = "sync";
+				trig_src = <0>;
+				trig_mode = <1>;
+				status = "okay";
+			};
+
+			rx2_ser_prim: rx2_max9295_prim@40 {
+				compatible = "d-robotics,max9295";
+				reg = <0x40>;
+				is-prim-ser;
+				rx_index = <2>;
+				status = "okay";
+			};
+
+			rx2_ser_a: rx2_max9295_a@41 {
+				compatible = "d-robotics,max9295";
+				reg = <0x41>;
+				link-port = <0>;
+				rx_index = <2>;
+				status = "okay";
+			};
+
+			rx2_sensing_a@11 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x11>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx2_ser_a>;
+				d-robotics,serdes-dser-device = <&rx2_dser>;
+				status = "okay";
+
+				port {
+					rx2_sensor_a_out: endpoint {
+						remote-endpoint = <&rx2_mipi_vc0_in>;
+						virtual-channel = <0>;
+					};
+				};
+			};
+
+			rx2_ser_b: rx2_max9295_b@42 {
+				compatible = "d-robotics,max9295";
+				reg = <0x42>;
+				link-port = <1>;
+				rx_index = <2>;
+				status = "okay";
+			};
+
+			rx2_sensing_b@12 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x12>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx2_ser_b>;
+				d-robotics,serdes-dser-device = <&rx2_dser>;
+				status = "okay";
+
+				port {
+					rx2_sensor_b_out: endpoint {
+						remote-endpoint = <&rx2_mipi_vc1_in>;
+						virtual-channel = <1>;
+					};
+				};
+			};
+
+			rx2_ser_c: rx2_max9295_c@43 {
+				compatible = "d-robotics,max9295";
+				reg = <0x43>;
+				link-port = <2>;
+				rx_index = <2>;
+				status = "okay";
+			};
+
+			rx2_sensing_c@13 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x13>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx2_ser_c>;
+				d-robotics,serdes-dser-device = <&rx2_dser>;
+				status = "okay";
+
+				port {
+					rx2_sensor_c_out: endpoint {
+						remote-endpoint = <&rx2_mipi_vc2_in>;
+						virtual-channel = <2>;
+					};
+				};
+			};
+
+			rx2_ser_d: rx2_max9295_d@44 {
+				compatible = "d-robotics,max9295";
+				reg = <0x44>;
+				link-port = <3>;
+				rx_index = <2>;
+				status = "okay";
+			};
+
+			rx2_sensing_d@14 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x14>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx2_ser_d>;
+				d-robotics,serdes-dser-device = <&rx2_dser>;
+				status = "okay";
+
+				port {
+					rx2_sensor_d_out: endpoint {
+						remote-endpoint = <&rx2_mipi_vc3_in>;
+						virtual-channel = <3>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@3 {
+		target-path = "/soc/i2c@34843000/"; /* I2C3 */
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <100000>;
+
+			rx3_dser: rx3_max96712@29 {
+				compatible = "d-robotics,max96712";
+				reg = <0x29>;
+				phy_type = <1>; /* C-PHY */
+				phy_speed = <3648>; /* C-PHY 1600 Msps/trio: DPLL code 0x10 */
+				sensing,trigger-period-ns = <33333333>;
+				sensing,trigger-duty-ns = <10000>;
+				pwdn-gpios = <&peri_port0 7 GPIO_ACTIVE_HIGH>;
+				poc_en-gpios = <&gpio_exp_27 3 GPIO_ACTIVE_HIGH>;
+				soc_trig_pin = <5>;
+				pwms = <&lpwm3 2 33333000 20000>;
+				pwm-names = "sync";
+				trig_src = <0>;
+				trig_mode = <1>;
+				status = "okay";
+			};
+
+			rx3_ser_prim: rx3_max9295_prim@40 {
+				compatible = "d-robotics,max9295";
+				reg = <0x40>;
+				is-prim-ser;
+				rx_index = <3>;
+				status = "okay";
+			};
+
+			rx3_ser_a: rx3_max9295_a@41 {
+				compatible = "d-robotics,max9295";
+				reg = <0x41>;
+				link-port = <0>;
+				rx_index = <3>;
+				status = "okay";
+			};
+
+			rx3_sensing_a@11 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x11>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx3_ser_a>;
+				d-robotics,serdes-dser-device = <&rx3_dser>;
+				status = "okay";
+
+				port {
+					rx3_sensor_a_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc0_in>;
+						virtual-channel = <0>;
+					};
+				};
+			};
+
+			rx3_ser_b: rx3_max9295_b@42 {
+				compatible = "d-robotics,max9295";
+				reg = <0x42>;
+				link-port = <1>;
+				rx_index = <3>;
+				status = "okay";
+			};
+
+			rx3_sensing_b@12 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x12>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx3_ser_b>;
+				d-robotics,serdes-dser-device = <&rx3_dser>;
+				status = "okay";
+
+				port {
+					rx3_sensor_b_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc1_in>;
+						virtual-channel = <1>;
+					};
+				};
+			};
+
+			rx3_ser_c: rx3_max9295_c@43 {
+				compatible = "d-robotics,max9295";
+				reg = <0x43>;
+				link-port = <2>;
+				rx_index = <3>;
+				status = "okay";
+			};
+
+			rx3_sensing_c@13 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x13>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx3_ser_c>;
+				d-robotics,serdes-dser-device = <&rx3_dser>;
+				status = "okay";
+
+				port {
+					rx3_sensor_c_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc2_in>;
+						virtual-channel = <2>;
+					};
+				};
+			};
+
+			rx3_ser_d: rx3_max9295_d@44 {
+				compatible = "d-robotics,max9295";
+				reg = <0x44>;
+				link-port = <3>;
+				rx_index = <3>;
+				status = "okay";
+			};
+
+			rx3_sensing_d@14 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x14>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
+				gmsl-link-rate = <6>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx3_ser_d>;
+				d-robotics,serdes-dser-device = <&rx3_dser>;
+				status = "okay";
+
+				port {
+					rx3_sensor_d_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc3_in>;
+						virtual-channel = <3>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@4 {
+		target-path = "/soc/cim@0x37430000/"; /* CIM0 */
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@5 {
+		target-path = "/soc/cim@0x37630000/"; /* CIM1 */
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@6 {
+		target-path = "/soc/cim@0x37830000/"; /* CIM2 */
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@7 {
+		target-path = "/soc/cim@0x37A30000/"; /* CIM3 */
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@8 {
+		target-path = "/soc/mipi_host@0x37420000/"; /* MIPI RX0 */
+		__overlay__ {
+			status = "okay";
+			ports {
+				port@0 {
+					rx0_mipi_vc0_in: endpoint {
+						remote-endpoint = <&rx0_sensor_a_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <0>;
+						emb-en = <0>;
+					};
+				};
+				port@1 {
+					rx0_mipi_vc1_in: endpoint {
+						remote-endpoint = <&rx0_sensor_b_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <1>;
+						emb-en = <0>;
+					};
+				};
+				port@2 {
+					rx0_mipi_vc2_in: endpoint {
+						remote-endpoint = <&rx0_sensor_c_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <2>;
+						emb-en = <0>;
+					};
+				};
+				port@3 {
+					rx0_mipi_vc3_in: endpoint {
+						remote-endpoint = <&rx0_sensor_d_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <3>;
+						emb-en = <0>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@9 {
+		target-path = "/soc/mipi_host@0x37620000/"; /* MIPI RX1 */
+		__overlay__ {
+			status = "okay";
+			ports {
+				port@0 {
+					rx1_mipi_vc0_in: endpoint {
+						remote-endpoint = <&rx1_sensor_a_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <0>;
+						emb-en = <0>;
+					};
+				};
+				port@1 {
+					rx1_mipi_vc1_in: endpoint {
+						remote-endpoint = <&rx1_sensor_b_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <1>;
+						emb-en = <0>;
+					};
+				};
+				port@2 {
+					rx1_mipi_vc2_in: endpoint {
+						remote-endpoint = <&rx1_sensor_c_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <2>;
+						emb-en = <0>;
+					};
+				};
+				port@3 {
+					rx1_mipi_vc3_in: endpoint {
+						remote-endpoint = <&rx1_sensor_d_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <3>;
+						emb-en = <0>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@10 {
+		target-path = "/soc/mipi_host@0x37820000/"; /* MIPI RX2 */
+		__overlay__ {
+			status = "okay";
+			ports {
+				port@0 {
+					rx2_mipi_vc0_in: endpoint {
+						remote-endpoint = <&rx2_sensor_a_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <0>;
+						emb-en = <0>;
+					};
+				};
+				port@1 {
+					rx2_mipi_vc1_in: endpoint {
+						remote-endpoint = <&rx2_sensor_b_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <1>;
+						emb-en = <0>;
+					};
+				};
+				port@2 {
+					rx2_mipi_vc2_in: endpoint {
+						remote-endpoint = <&rx2_sensor_c_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <2>;
+						emb-en = <0>;
+					};
+				};
+				port@3 {
+					rx2_mipi_vc3_in: endpoint {
+						remote-endpoint = <&rx2_sensor_d_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3 4>;
+						lane-rate = <10000>;
+						vc_id = <3>;
+						emb-en = <0>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@11 {
+		target-path = "/soc/mipi_host@0x37A20000/"; /* MIPI RX3 */
+		__overlay__ {
+			status = "okay";
+			ports {
+				port@0 {
+					rx3_mipi_vc0_in: endpoint {
+						remote-endpoint = <&rx3_sensor_a_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <0>;
+						emb-en = <0>;
+					};
+				};
+				port@1 {
+					rx3_mipi_vc1_in: endpoint {
+						remote-endpoint = <&rx3_sensor_b_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <1>;
+						emb-en = <0>;
+					};
+				};
+				port@2 {
+					rx3_mipi_vc2_in: endpoint {
+						remote-endpoint = <&rx3_sensor_c_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <2>;
+						emb-en = <0>;
+					};
+				};
+				port@3 {
+					rx3_mipi_vc3_in: endpoint {
+						remote-endpoint = <&rx3_sensor_d_out>;
+						clock-lanes = <0>;
+						data-lanes = <1 2 3>;
+						lane-rate = <4800>;
+						phy_type = <1>; /* C-PHY */
+						vc_id = <3>;
+						emb-en = <0>;
+					};
+				};
+			};
+		};
+	};
+
+};
