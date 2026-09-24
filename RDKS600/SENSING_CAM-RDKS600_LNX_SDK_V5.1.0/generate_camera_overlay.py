@@ -6,18 +6,20 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 NAME = "s600_sensing_cam_rx0123_portABCD_yuv"
 SOURCE = HERE.parent / "platform_source_code/source/hobot-camera/v4l2/dts_overlays"
-MONO = ("SN2M4EFGD", "SG3S11AFSK", "SG8-OX08DC-5300-G2G-Hxxx", "SG8S-AR0820C-5300-G2G-Hxxx")
+MONO = ("SN2M4EFGD", "SG3S11AFSK", "SHF3L", "SG8-OX08DC-5300-G2G-Hxxx", "SG8S-AR0820C-5300-G2G-Hxxx")
 STEREO = ("S36", "S56")
 LETTERS = "abcd"
 MONO_RESOLUTION = {
     "SN2M4EFGD": (1920, 1080),
     "SG3S11AFSK": (1920, 1536),
+    "SHF3L": (1920, 1536),
     "SG8-OX08DC-5300-G2G-Hxxx": (3840, 2160),
     "SG8S-AR0820C-5300-G2G-Hxxx": (3840, 2160),
 }
 MONO_LINK_RATE = {
     "SN2M4EFGD": 3,
     "SG3S11AFSK": 3,
+    "SHF3L": 6,
     "SG8-OX08DC-5300-G2G-Hxxx": 6,
     "SG8S-AR0820C-5300-G2G-Hxxx": 6,
 }

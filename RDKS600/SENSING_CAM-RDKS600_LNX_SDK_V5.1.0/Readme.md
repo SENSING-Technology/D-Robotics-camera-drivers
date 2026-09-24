@@ -31,12 +31,22 @@ This driver package currently only supports the v4l2 framework.
 | -------------------------- | ------------- | ------------: | -------------: |
 | SN2M4EFGD                  | Monocular YUV |     1920×1080 |             3G |
 | SG3S11AFSK                 | Monocular YUV |     1920×1536 |             3G |
+| SHF3L                      | Monocular YUV |     1920×1536 |             6G |
 | SG8-OX08DC-5300-G2G-Hxxx   | Monocular YUV |     3840×2160 |             6G |
 | SG8S-AR0820C-5300-G2G-Hxxx | Monocular YUV |     3840×2160 |             6G |
 | S36                        | Stereo        | 1920×1536 × 2 |             6G |
 | S56                        | Stereo        | 2560×1984 × 2 |             6G |
 
 A stereo camera may start only on Link A or Link C. A stereo camera on Link A consumes Links A+B and VC0/VC1. A stereo camera on Link C consumes Links C+D and VC2/VC3. Each RX supports up to two stereo camera pairs.
+
+> **RAW/YUV placement rule:** Do not mix an S56 RAW camera and a YUV camera
+> on the same RX/MAX96712 CSI output. Put RAW and YUV cameras on different
+> RX instances (for example, S56 on RX0 and SHF3L on RX1). Each physical
+> GMSL Port A-D accepts only one camera connection; here “same RX” means the
+> four Ports that share one MAX96712 and one S600 MIPI receiver. This rule
+> avoids applying one RX/ISP capture path to streams with incompatible RAW10
+> and YUV422 formats. It is independent of the aggregate bandwidth check,
+> which must also include CSI-2 protocol overhead.
 
 ### Connector Modes
 
@@ -113,10 +123,10 @@ that Port. A stereo S36/S56 on Port A reserves Port B and VC0/VC1; one on
 Port C reserves Port D and VC2/VC3. The available numbers can change when
 fewer than two VCs remain, so use the menu currently printed on screen.
 
-For example, to configure **J12** with S56 on RX0 Port A, an
-SG8-OX08DC-5300-G2G-Hxxx YUV camera on RX0 Port C, and all other Ports
-disabled, type `6` for RX0 Port A, `3` for RX0 Port C, then `0` for RX0
-Port D and each of RX1 Ports A-D. Port B is skipped automatically:
+For example, to configure **J12** without mixing RAW and YUV on one RX, put
+S56 on RX0 Port A and SHF3L on RX1 Port A. Type `7` for RX0 Port A, disable
+RX0 Port C/D, type `3` for RX1 Port A, and disable RX1 Port B-D. RX0 Port B
+is skipped automatically because it is reserved by S56:
 
 ```text
 Mode: j12 (enabled RX: RX0, RX1)
@@ -126,36 +136,38 @@ RX0 Port A:
   0: DISABLED (unused physical link)
   1: SN2M4EFGD (mono YUV, one VC)
   2: SG3S11AFSK (mono YUV, one VC)
-  3: SG8-OX08DC-5300-G2G-Hxxx (mono YUV, one VC)
-  4: SG8S-AR0820C-5300-G2G-Hxxx (mono YUV, one VC)
-  5: S36 (stereo, one physical link and two VCs)
-  6: S56 (stereo, one physical link and two VCs)
-Select 0-6: 6
+  3: SHF3L (mono YUV, one VC)
+  4: SG8-OX08DC-5300-G2G-Hxxx (mono YUV, one VC)
+  5: SG8S-AR0820C-5300-G2G-Hxxx (mono YUV, one VC)
+  6: S36 (stereo, one physical link and two VCs)
+  7: S56 (stereo, one physical link and two VCs)
+Select 0-7: 7
   S56 uses RX0 Port A+B, reserves output VC0+VC1, and skips Port B.
 
 RX0 Port C:
   0: DISABLED (unused physical link)
   1: SN2M4EFGD (mono YUV, one VC)
   2: SG3S11AFSK (mono YUV, one VC)
-  3: SG8-OX08DC-5300-G2G-Hxxx (mono YUV, one VC)
-  4: SG8S-AR0820C-5300-G2G-Hxxx (mono YUV, one VC)
-  5: S36 (stereo, one physical link and two VCs)
-  6: S56 (stereo, one physical link and two VCs)
-Select 0-6: 3
-  Fixed configuration: 3840x2160, 6G
+  3: SHF3L (mono YUV, one VC)
+  4: SG8-OX08DC-5300-G2G-Hxxx (mono YUV, one VC)
+  5: SG8S-AR0820C-5300-G2G-Hxxx (mono YUV, one VC)
+  6: S36 (stereo, one physical link and two VCs)
+  7: S56 (stereo, one physical link and two VCs)
+Select 0-7: 0
 
-RX0 Port D: Select 0-4: 0
-RX1 Port A: Select 0-6: 0
-RX1 Port B: Select 0-4: 0
-RX1 Port C: Select 0-6: 0
-RX1 Port D: Select 0-4: 0
+RX0 Port D: Select 0-5: 0
+RX1 Port A: Select 0-7: 3
+  Fixed configuration: 1920x1536, 6G
+RX1 Port B: Select 0-5: 0
+RX1 Port C: Select 0-7: 0
+RX1 Port D: Select 0-5: 0
 
 Final configuration:
   RX0 Port A VC0+VC1: S56 2560x1984
   RX0 Port B: reserved by previous stereo camera
-  RX0 Port C VC2: SG8-OX08DC-5300-G2G-Hxxx 3840x2160
+  RX0 Port C: disabled
   RX0 Port D: disabled
-  RX1 Port A: disabled
+  RX1 Port A VC0: SHF3L 1920x1536
   RX1 Port B: disabled
   RX1 Port C: disabled
   RX1 Port D: disabled
@@ -277,6 +289,7 @@ RAW-to-ISP / YUV-direct route, use these capture settings for each active VC:
 | --- | ---: | ---: | ---: | --- |
 | SN2M4EFGD | 1 | 1920 | 1080 | NV16 |
 | SG3S11AFSK | 1 | 1920 | 1536 | NV16 |
+| SHF3L | 1 | 1920 | 1536 | NV16 |
 | SG8-OX08DC-5300-G2G-Hxxx | 1 | 3840 | 2160 | NV16 |
 | SG8S-AR0820C-5300-G2G-Hxxx | 1 | 3840 | 2160 | NV16 |
 | S36 | 2 | 1920 | 1536 | NV16 on each VC |
@@ -357,3 +370,4 @@ Rolling back the kernel requires installing the original linux-image, linux-head
 - Two S56 stereo pairs connected to the same RX share one LPWM trigger source and therefore use the same trigger frequency.
 - Equal trigger frequencies do not guarantee phase alignment between different LPWM channels. Validate multi-RX synchronization with an oscilloscope and frame timestamps.
 - A successfully compiled device tree confirms structural validity only. Complete real-hardware probe, streaming, bandwidth, and synchronization validation before release.
+- It is advisable not to connect both YUV and RAW cameras to the same RX port at the same time.

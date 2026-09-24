@@ -19,7 +19,7 @@
 	fragment@0 {
 		target-path = "/soc/i2c@34840000/"; /* I2C0 */
 		__overlay__ {
-			status = "disabled";
+			status = "okay";
 			clock-frequency = <100000>;
 
 			rx0_dser: rx0_max96712@29 {
@@ -27,15 +27,15 @@
 				reg = <0x29>;
 				phy_type = <0>; /* D-PHY */
 				phy_speed = <2500>; /* 2.5 Gbps per lane */
-				sensing,trigger-period-ns = <33333333>;
+				sensing,trigger-period-ns = <40000000>;
 				sensing,trigger-duty-ns = <10000>;
 				pwdn-gpios = <&peri_port0 4 GPIO_ACTIVE_HIGH>;
 				poc_en-gpios = <&gpio_exp_27 0 GPIO_ACTIVE_HIGH>;
 				soc_trig_pin = <5>;
-				pwms = <&lpwm0 0 33333000 20000>;
+				pwms = <&lpwm0 0 40000000 10000>;
 				pwm-names = "sync";
 				trig_src = <0>;
-				trig_mode = <1>;
+				trig_mode = <0>;
 				status = "okay";
 			};
 
@@ -52,28 +52,44 @@
 				reg = <0x41>;
 				link-port = <0>;
 				rx_index = <0>;
-				status = "okay";
+				status = "disabled";
 			};
-
-			rx0_sensing_a@11 {
-				compatible = "sensing,sensing-cam";
-				reg = <0x11>;
-				addr = <0x10>;
-				width = <3840>;
-				height = <2160>;
-				data_type = <0x1e>;
+			rx0_s56@22 {
+				compatible = "sensing,s56-gmsl2";
+				reg = <0x22>;
+				link-port = <0>;
 				gmsl-link-rate = <6>;
-				lane_num = <4>;
-				mfp-reset = <0>;
-				mfp-trigger = <7>;
-				d-robotics,serdes-ser-device = <&rx0_ser_a>;
+				width = <2560>;
+				height = <1984>;
+				sensing,sensor-default-addresses = <0x10 0x11>;
+				sensing,sensor-alias-addresses = <0x22 0x23>;
+				sensing,serializer-alias = <0x41>;
+				sensing,stream-pipes = <0 1>;
+				sensing,stream-dst-vcs = <0 1>;
+				sensing,trigger-mode = <1>;
+				sensing,trigger-mfp = <7>;
+				sensing,trigger-gpio-id = <7>;
+				sensing,trigger-period-ns = <40000000>;
+				sensing,trigger-duty-ns = <10000>;
 				d-robotics,serdes-dser-device = <&rx0_dser>;
 				status = "okay";
 
-				port {
-					rx0_sensor_a_out: endpoint {
-						remote-endpoint = <&rx0_mipi_vc0_in>;
-						virtual-channel = <0>;
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					port@0 {
+						reg = <0>;
+						rx0_sensor_a_out_0: endpoint {
+							remote-endpoint = <&rx0_mipi_vc0_in>;
+							virtual-channel = <0>;
+						};
+					};
+					port@1 {
+						reg = <1>;
+						rx0_sensor_a_out_1: endpoint {
+							remote-endpoint = <&rx0_mipi_vc1_in>;
+							virtual-channel = <1>;
+						};
 					};
 				};
 			};
@@ -83,7 +99,7 @@
 				reg = <0x42>;
 				link-port = <1>;
 				rx_index = <0>;
-				status = "okay";
+				status = "disabled";
 			};
 
 			rx0_sensing_b@12 {
@@ -99,11 +115,10 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx0_ser_b>;
 				d-robotics,serdes-dser-device = <&rx0_dser>;
-				status = "okay";
+				status = "disabled";
 
 				port {
 					rx0_sensor_b_out: endpoint {
-						remote-endpoint = <&rx0_mipi_vc1_in>;
 						virtual-channel = <1>;
 					};
 				};
@@ -114,7 +129,7 @@
 				reg = <0x43>;
 				link-port = <2>;
 				rx_index = <0>;
-				status = "okay";
+				status = "disabled";
 			};
 
 			rx0_sensing_c@13 {
@@ -130,11 +145,10 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx0_ser_c>;
 				d-robotics,serdes-dser-device = <&rx0_dser>;
-				status = "okay";
+				status = "disabled";
 
 				port {
 					rx0_sensor_c_out: endpoint {
-						remote-endpoint = <&rx0_mipi_vc2_in>;
 						virtual-channel = <2>;
 					};
 				};
@@ -145,7 +159,7 @@
 				reg = <0x44>;
 				link-port = <3>;
 				rx_index = <0>;
-				status = "okay";
+				status = "disabled";
 			};
 
 			rx0_sensing_d@14 {
@@ -161,11 +175,10 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx0_ser_d>;
 				d-robotics,serdes-dser-device = <&rx0_dser>;
-				status = "okay";
+				status = "disabled";
 
 				port {
 					rx0_sensor_d_out: endpoint {
-						remote-endpoint = <&rx0_mipi_vc3_in>;
 						virtual-channel = <3>;
 					};
 				};
@@ -176,7 +189,7 @@
 	fragment@1 {
 		target-path = "/soc/i2c@34841000/"; /* I2C1 */
 		__overlay__ {
-			status = "disabled";
+			status = "okay";
 			clock-frequency = <100000>;
 
 			rx1_dser: rx1_max96712@29 {
@@ -184,12 +197,12 @@
 				reg = <0x29>;
 				phy_type = <1>; /* C-PHY */
 				phy_speed = <3648>; /* C-PHY 1600 Msps/trio: DPLL code 0x10 */
-				sensing,trigger-period-ns = <33333333>;
+				sensing,trigger-period-ns = <40000000>;
 				sensing,trigger-duty-ns = <10000>;
 				pwdn-gpios = <&peri_port0 5 GPIO_ACTIVE_HIGH>;
 				poc_en-gpios = <&gpio_exp_27 1 GPIO_ACTIVE_HIGH>;
 				soc_trig_pin = <5>;
-				pwms = <&lpwm0 2 33333000 20000>;
+				pwms = <&lpwm0 2 40000000 10000>;
 				pwm-names = "sync";
 				trig_src = <0>;
 				trig_mode = <1>;
@@ -214,10 +227,11 @@
 
 			rx1_sensing_a@11 {
 				compatible = "sensing,sensing-cam";
+				sensing,model = "SHF3L";
 				reg = <0x11>;
 				addr = <0x10>;
 				width = <1920>;
-				height = <1080>;
+				height = <1536>;
 				data_type = <0x1e>;
 				gmsl-link-rate = <6>;
 				lane_num = <4>;
@@ -241,7 +255,7 @@
 				reg = <0x42>;
 				link-port = <1>;
 				rx_index = <1>;
-				status = "okay";
+				status = "disabled";
 			};
 
 			rx1_sensing_b@12 {
@@ -258,11 +272,10 @@
 				stereo_right; 
 				d-robotics,serdes-ser-device = <&rx1_ser_b>;
 				d-robotics,serdes-dser-device = <&rx1_dser>;
-				status = "okay";
+				status = "disabled";
 
 				port {
 					rx1_sensor_b_out: endpoint {
-						remote-endpoint = <&rx1_mipi_vc1_in>;
 						virtual-channel = <1>;
 					};
 				};
@@ -273,7 +286,7 @@
 				reg = <0x43>;
 				link-port = <2>;
 				rx_index = <1>;
-				status = "okay";
+				status = "disabled";
 			};
 
 			rx1_sensing_c@13 {
@@ -289,11 +302,10 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx1_ser_c>;
 				d-robotics,serdes-dser-device = <&rx1_dser>;
-				status = "okay";
+				status = "disabled";
 
 				port {
 					rx1_sensor_c_out: endpoint {
-						remote-endpoint = <&rx1_mipi_vc2_in>;
 						virtual-channel = <2>;
 					};
 				};
@@ -304,7 +316,7 @@
 				reg = <0x44>;
 				link-port = <3>;
 				rx_index = <1>;
-				status = "okay";
+				status = "disabled";
 			};
 
 			rx1_sensing_d@14 {
@@ -320,11 +332,10 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx1_ser_d>;
 				d-robotics,serdes-dser-device = <&rx1_dser>;
-				status = "okay";
+				status = "disabled";
 
 				port {
 					rx1_sensor_d_out: endpoint {
-						remote-endpoint = <&rx1_mipi_vc3_in>;
 						virtual-channel = <3>;
 					};
 				};
@@ -335,7 +346,7 @@
 	fragment@2 {
 		target-path = "/soc/i2c@34842000/"; /* I2C2 */
 		__overlay__ {
-			status = "okay";
+			status = "disabled";
 			clock-frequency = <100000>;
 
 			rx2_dser: rx2_max96712@29 {
@@ -348,10 +359,10 @@
 				pwdn-gpios = <&peri_port0 6 GPIO_ACTIVE_HIGH>;
 				poc_en-gpios = <&gpio_exp_27 2 GPIO_ACTIVE_HIGH>;
 				soc_trig_pin = <5>;
-				pwms = <&lpwm3 0 33333333 10000>;
+				pwms = <&lpwm3 0 33333000 20000>;
 				pwm-names = "sync";
 				trig_src = <0>;
-				trig_mode = <0>;
+				trig_mode = <1>;
 				status = "okay";
 			};
 
@@ -368,44 +379,28 @@
 				reg = <0x41>;
 				link-port = <0>;
 				rx_index = <2>;
-				status = "disabled";
+				status = "okay";
 			};
-			rx2_s56@22 {
-				compatible = "sensing,s56-gmsl2";
-				reg = <0x22>;
-				link-port = <0>;
+
+			rx2_sensing_a@11 {
+				compatible = "sensing,sensing-cam";
+				reg = <0x11>;
+				addr = <0x10>;
+				width = <1920>;
+				height = <1080>;
+				data_type = <0x1e>;
 				gmsl-link-rate = <6>;
-				width = <2560>;
-				height = <1984>;
-				sensing,sensor-default-addresses = <0x10 0x11>;
-				sensing,sensor-alias-addresses = <0x22 0x23>;
-				sensing,serializer-alias = <0x41>;
-				sensing,stream-pipes = <0 1>;
-				sensing,stream-dst-vcs = <0 1>;
-				sensing,trigger-mode = <1>;
-				sensing,trigger-mfp = <7>;
-				sensing,trigger-gpio-id = <7>;
-				sensing,trigger-period-ns = <33333333>;
-				sensing,trigger-duty-ns = <10000>;
+				lane_num = <4>;
+				mfp-reset = <0>;
+				mfp-trigger = <7>;
+				d-robotics,serdes-ser-device = <&rx2_ser_a>;
 				d-robotics,serdes-dser-device = <&rx2_dser>;
 				status = "okay";
 
-				ports {
-					#address-cells = <1>;
-					#size-cells = <0>;
-					port@0 {
-						reg = <0>;
-						rx2_sensor_a_out_0: endpoint {
-							remote-endpoint = <&rx2_mipi_vc0_in>;
-							virtual-channel = <0>;
-						};
-					};
-					port@1 {
-						reg = <1>;
-						rx2_sensor_a_out_1: endpoint {
-							remote-endpoint = <&rx2_mipi_vc1_in>;
-							virtual-channel = <1>;
-						};
+				port {
+					rx2_sensor_a_out: endpoint {
+						remote-endpoint = <&rx2_mipi_vc0_in>;
+						virtual-channel = <0>;
 					};
 				};
 			};
@@ -415,7 +410,7 @@
 				reg = <0x42>;
 				link-port = <1>;
 				rx_index = <2>;
-				status = "disabled";
+				status = "okay";
 			};
 
 			rx2_sensing_b@12 {
@@ -431,10 +426,11 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx2_ser_b>;
 				d-robotics,serdes-dser-device = <&rx2_dser>;
-				status = "disabled";
+				status = "okay";
 
 				port {
 					rx2_sensor_b_out: endpoint {
+						remote-endpoint = <&rx2_mipi_vc1_in>;
 						virtual-channel = <1>;
 					};
 				};
@@ -450,11 +446,10 @@
 
 			rx2_sensing_c@13 {
 				compatible = "sensing,sensing-cam";
-				sensing,model = "SG8-OX08DC-5300-G2G-Hxxx";
 				reg = <0x13>;
 				addr = <0x10>;
-				width = <3840>;
-				height = <2160>;
+				width = <1920>;
+				height = <1080>;
 				data_type = <0x1e>;
 				gmsl-link-rate = <6>;
 				lane_num = <4>;
@@ -477,7 +472,7 @@
 				reg = <0x44>;
 				link-port = <3>;
 				rx_index = <2>;
-				status = "disabled";
+				status = "okay";
 			};
 
 			rx2_sensing_d@14 {
@@ -493,10 +488,11 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx2_ser_d>;
 				d-robotics,serdes-dser-device = <&rx2_dser>;
-				status = "disabled";
+				status = "okay";
 
 				port {
 					rx2_sensor_d_out: endpoint {
+						remote-endpoint = <&rx2_mipi_vc3_in>;
 						virtual-channel = <3>;
 					};
 				};
@@ -507,7 +503,7 @@
 	fragment@3 {
 		target-path = "/soc/i2c@34843000/"; /* I2C3 */
 		__overlay__ {
-			status = "okay";
+			status = "disabled";
 			clock-frequency = <100000>;
 
 			rx3_dser: rx3_max96712@29 {
@@ -520,7 +516,7 @@
 				pwdn-gpios = <&peri_port0 7 GPIO_ACTIVE_HIGH>;
 				poc_en-gpios = <&gpio_exp_27 3 GPIO_ACTIVE_HIGH>;
 				soc_trig_pin = <5>;
-				pwms = <&lpwm3 2 33333333 10000>;
+				pwms = <&lpwm3 2 33333000 20000>;
 				pwm-names = "sync";
 				trig_src = <0>;
 				trig_mode = <1>;
@@ -540,7 +536,7 @@
 				reg = <0x41>;
 				link-port = <0>;
 				rx_index = <3>;
-				status = "disabled";
+				status = "okay";
 			};
 
 			rx3_sensing_a@11 {
@@ -556,10 +552,11 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx3_ser_a>;
 				d-robotics,serdes-dser-device = <&rx3_dser>;
-				status = "disabled";
+				status = "okay";
 
 				port {
 					rx3_sensor_a_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc0_in>;
 						virtual-channel = <0>;
 					};
 				};
@@ -570,7 +567,7 @@
 				reg = <0x42>;
 				link-port = <1>;
 				rx_index = <3>;
-				status = "disabled";
+				status = "okay";
 			};
 
 			rx3_sensing_b@12 {
@@ -586,10 +583,11 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx3_ser_b>;
 				d-robotics,serdes-dser-device = <&rx3_dser>;
-				status = "disabled";
+				status = "okay";
 
 				port {
 					rx3_sensor_b_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc1_in>;
 						virtual-channel = <1>;
 					};
 				};
@@ -600,7 +598,7 @@
 				reg = <0x43>;
 				link-port = <2>;
 				rx_index = <3>;
-				status = "disabled";
+				status = "okay";
 			};
 
 			rx3_sensing_c@13 {
@@ -616,10 +614,11 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx3_ser_c>;
 				d-robotics,serdes-dser-device = <&rx3_dser>;
-				status = "disabled";
+				status = "okay";
 
 				port {
 					rx3_sensor_c_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc2_in>;
 						virtual-channel = <2>;
 					};
 				};
@@ -630,7 +629,7 @@
 				reg = <0x44>;
 				link-port = <3>;
 				rx_index = <3>;
-				status = "disabled";
+				status = "okay";
 			};
 
 			rx3_sensing_d@14 {
@@ -646,10 +645,11 @@
 				mfp-trigger = <7>;
 				d-robotics,serdes-ser-device = <&rx3_ser_d>;
 				d-robotics,serdes-dser-device = <&rx3_dser>;
-				status = "disabled";
+				status = "okay";
 
 				port {
 					rx3_sensor_d_out: endpoint {
+						remote-endpoint = <&rx3_mipi_vc3_in>;
 						virtual-channel = <3>;
 					};
 				};
@@ -692,7 +692,7 @@
 			ports {
 				port@0 {
 					rx0_mipi_vc0_in: endpoint {
-						remote-endpoint = <&rx0_sensor_a_out>;
+						remote-endpoint = <&rx0_sensor_a_out_0>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3 4>;
 						lane-rate = <10000>;
@@ -702,7 +702,7 @@
 				};
 				port@1 {
 					rx0_mipi_vc1_in: endpoint {
-						remote-endpoint = <&rx0_sensor_b_out>;
+						remote-endpoint = <&rx0_sensor_a_out_1>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3 4>;
 						lane-rate = <10000>;
@@ -712,7 +712,6 @@
 				};
 				port@2 {
 					rx0_mipi_vc2_in: endpoint {
-						remote-endpoint = <&rx0_sensor_c_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3 4>;
 						lane-rate = <10000>;
@@ -722,7 +721,6 @@
 				};
 				port@3 {
 					rx0_mipi_vc3_in: endpoint {
-						remote-endpoint = <&rx0_sensor_d_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3 4>;
 						lane-rate = <10000>;
@@ -752,7 +750,6 @@
 				};
 				port@1 {
 					rx1_mipi_vc1_in: endpoint {
-						remote-endpoint = <&rx1_sensor_b_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3>;
 						lane-rate = <4800>;
@@ -763,7 +760,6 @@
 				};
 				port@2 {
 					rx1_mipi_vc2_in: endpoint {
-						remote-endpoint = <&rx1_sensor_c_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3>;
 						lane-rate = <4800>;
@@ -774,7 +770,6 @@
 				};
 				port@3 {
 					rx1_mipi_vc3_in: endpoint {
-						remote-endpoint = <&rx1_sensor_d_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3>;
 						lane-rate = <4800>;
@@ -794,7 +789,7 @@
 			ports {
 				port@0 {
 					rx2_mipi_vc0_in: endpoint {
-						remote-endpoint = <&rx2_sensor_a_out_0>;
+						remote-endpoint = <&rx2_sensor_a_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3 4>;
 						lane-rate = <10000>;
@@ -804,7 +799,7 @@
 				};
 				port@1 {
 					rx2_mipi_vc1_in: endpoint {
-						remote-endpoint = <&rx2_sensor_a_out_1>;
+						remote-endpoint = <&rx2_sensor_b_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3 4>;
 						lane-rate = <10000>;
@@ -824,6 +819,7 @@
 				};
 				port@3 {
 					rx2_mipi_vc3_in: endpoint {
+						remote-endpoint = <&rx2_sensor_d_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3 4>;
 						lane-rate = <10000>;
@@ -842,6 +838,7 @@
 			ports {
 				port@0 {
 					rx3_mipi_vc0_in: endpoint {
+						remote-endpoint = <&rx3_sensor_a_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3>;
 						lane-rate = <4800>;
@@ -852,6 +849,7 @@
 				};
 				port@1 {
 					rx3_mipi_vc1_in: endpoint {
+						remote-endpoint = <&rx3_sensor_b_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3>;
 						lane-rate = <4800>;
@@ -862,6 +860,7 @@
 				};
 				port@2 {
 					rx3_mipi_vc2_in: endpoint {
+						remote-endpoint = <&rx3_sensor_c_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3>;
 						lane-rate = <4800>;
@@ -872,6 +871,7 @@
 				};
 				port@3 {
 					rx3_mipi_vc3_in: endpoint {
+						remote-endpoint = <&rx3_sensor_d_out>;
 						clock-lanes = <0>;
 						data-lanes = <1 2 3>;
 						lane-rate = <4800>;
