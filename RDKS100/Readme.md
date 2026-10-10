@@ -3,6 +3,8 @@
 #### Supported Version
 
 * V4.0.2
+* V4.0.4
+* V4.0.5-20260930
 
 #### Hardware Connect
 
@@ -31,3 +33,16 @@
 | ---- | --------------------------- | ------------- | 
 | RAW  | S56                         | YES           | 
 | RAW  | SHW3G                       | YES           | 
+
+
+| Type | Camera                      |V4.0.5-20260930| 
+| ---- | --------------------------- | ------------- | 
+| YUV  | SG2-AR0233C-5200-G2A-Hxxx   | YES           | 
+| YUV  | SN2M4EFGD                   | YES           | 
+| YUV  | SG3S11ALFK                  | YES           | 
+| RAW  | SP2504M2M-A                 | YES           | 
+| RAW  | SP2504M2M-A(mipi)           | YES           | 
+| YUV  | SG8S-AR0820C-5300-G2A-Hxxx  | YES           | 
+| YUV  | S36                         | YES           |
+| RAW  | S56C                        | YES           | 
+| RAW  | OV50Q40(mipi)               | YES           |
